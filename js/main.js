@@ -23,76 +23,23 @@ let svg1 = d3.select('#vis1')
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`)
 
-  let data = d3.json("/data/population_spain.json")
+  let data = d3.csv("/data/population_spain.csv")
   data.then(function(data) {
 
     // Legend definition
-    svg1.append("circle").attr("cx",340).attr("cy",-20).attr("r", 6).style("fill", "#003f5c")
-    svg1.append("circle").attr("cx",340).attr("cy",10).attr("r", 6).style("fill", "#7a5195")
-    svg1.append("circle").attr("cx",340).attr("cy",40).attr("r", 6).style("fill", "#ef5675")
-    svg1.append("circle").attr("cx",340).attr("cy",70).attr("r", 6).style("fill", "#db8f00")
-    svg1.append("text").attr("x", 360).attr("y", -20).text("Range 1: 16 to 19 years old").style("font-size", "15px").attr("alignment-baseline","middle").style("fill", "#003f5c")
-    svg1.append("text").attr("x", 360).attr("y", 10).text("Range 2: 20 to 24 years old").style("font-size", "15px").attr("alignment-baseline","middle").style("fill", "#7a5195")
-    svg1.append("text").attr("x", 360).attr("y", 40).text("Range 3: 25 to 54 years old").style("font-size", "15px").attr("alignment-baseline","middle").style("fill", "#ef5675")
-    svg1.append("text").attr("x", 360).attr("y", 70).text("Range 4: 55 and above years old").style("font-size", "15px").attr("alignment-baseline","middle").style("fill", "#db8f00")
-    
-
-  var data = [
-    {
-      "Year": 2020,
-      "Range1": 5.54,
-      "Range2": 32.96,
-      "Range3": 73.1,
-      "Range4": 24.22
-    },
-    {
-      "Year": 2019,
-      "Range1": 8.02,
-      "Range2": 38.59,
-      "Range3": 75.75,
-      "Range4": 23.5
-    },
-    {
-      "Year": 2018,
-      "Range1": 7.36,
-      "Range2": 37.91,
-      "Range3": 74.67,
-      "Range4": 22.52
-    },
-    {
-      "Year": 2017,
-      "Range1": 6.63,
-      "Range2": 35.88,
-      "Range3": 73.17,
-      "Range4": 21.61
-    },
-    {
-      "Year": 2016,
-      "Range1": 5.49,
-      "Range2": 32.18,
-      "Range3": 71.49,
-      "Range4": 20.84
-    },
-    {
-      "Year": 2015,
-      "Range1": 4.87,
-      "Range2": 31.43,
-      "Range3": 69.39,
-      "Range4": 19.8
-    },
-    {
-      "Year": 2014,
-      "Range1": 4.64,
-      "Range2": 28.72,
-      "Range3": 67.41,
-      "Range4": 18.59
-    },
-  ];
+    svg1.append("circle").attr("cx",360).attr("cy",-20).attr("r", 6).style("fill", "#003f5c")
+    svg1.append("circle").attr("cx",360).attr("cy",10).attr("r", 6).style("fill", "#7a5195")
+    svg1.append("circle").attr("cx",360).attr("cy",40).attr("r", 6).style("fill", "#ef5675")
+    svg1.append("circle").attr("cx",360).attr("cy",70).attr("r", 6).style("fill", "#db8f00")
+    svg1.append("text").attr("x", 380).attr("y", -20).text("Range 1: 16 to 19 years old").style("font-size", "12px").attr("alignment-baseline","middle").style("fill", "#003f5c")
+    svg1.append("text").attr("x", 380).attr("y", 10).text("Range 2: 20 to 24 years old").style("font-size", "12px").attr("alignment-baseline","middle").style("fill", "#7a5195")
+    svg1.append("text").attr("x", 380).attr("y", 40).text("Range 3: 25 to 54 years old").style("font-size", "12px").attr("alignment-baseline","middle").style("fill", "#ef5675")
+    svg1.append("text").attr("x", 380).attr("y", 70).text("Range 4: 55 and above years old").style("font-size", "12px").attr("alignment-baseline","middle").style("fill", "#db8f00")
 
 // Axis limitations
 var xScale0 = d3.scaleBand().range([0, width - margin.left - margin.right]).padding(barPadding)
 var xScale1 = d3.scaleBand()
-var yScale = d3.scaleLinear().range([height - margin.top - margin.bottom, 0])
+var yScale = d3.scaleLinear().range([height - margin.bottom, 0])
 
 // Axis ticks
 var xAxis = d3.axisBottom(xScale0).tickSizeOuter(axisTicks.outerSize);
@@ -120,8 +67,11 @@ Year.selectAll(".bar.Range1")
 .attr("y", d => yScale(d.Range1))
 .attr("width", xScale1.bandwidth())
 .attr("height", d => {
-  return height - margin.top - margin.bottom - yScale(d.Range1)
-});
+  return height - margin.bottom - yScale(d.Range1)
+}).append('title') // Tooltip
+    .text(function (d) { return 'Age Range: 16-19 yo' +
+                           '\nPercentage Employed: ' + d.Range1 + '%' + 
+                            '\n Year: ' + d.Year});
 
 // Add field2 bars 
 Year.selectAll(".bar.Range2")
@@ -134,8 +84,11 @@ Year.selectAll(".bar.Range2")
 .attr("y", d => yScale(d.Range2))
 .attr("width", xScale1.bandwidth())
 .attr("height", d => {
-  return height - margin.top - margin.bottom - yScale(d.Range2)
-});
+  return height - margin.bottom - yScale(d.Range2)
+}).append('title') // Tooltip
+    .text(function (d) { return 'Age Range: 20-24 yo' +
+                           '\nPercentage Employed: ' + d.Range2 + '%' + 
+                            '\n Year: ' + d.Year});
 
 /* Add field3 bars */
 Year.selectAll(".bar.Range3")
@@ -148,8 +101,11 @@ Year.selectAll(".bar.Range3")
 .attr("y", d => yScale(d.Range3))
 .attr("width", xScale1.bandwidth())
 .attr("height", d => {
-  return height - margin.top - margin.bottom - yScale(d.Range3)
-});
+  return height - margin.bottom - yScale(d.Range3)
+}).append('title') // Tooltip
+    .text(function (d) { return 'Age Range: 25-54 yo' +
+                           '\nPercentage Employed: ' + d.Range3 + '%' + 
+                            '\n Year: ' + d.Year});
 
 /* Add field4 bars */
 Year.selectAll(".bar.Range4")
@@ -162,13 +118,16 @@ Year.selectAll(".bar.Range4")
 .attr("y", d => yScale(d.Range4))
 .attr("width", xScale1.bandwidth())
 .attr("height", d => {
-  return height - margin.top - margin.bottom - yScale(d.Range4)
-});
+  return height - margin.bottom - yScale(d.Range4)
+}).append('title') // Tooltip
+    .text(function (d) { return 'Age Range: 55+ yo' +
+                           '\nPercentage Employed: ' + d.Range4 + '%' + 
+                            '\n Year: ' + d.Year});
 
 // Add the X Axis
 svg1.append("g")
      .attr("class", "x axis")
-     .attr("transform", `translate(0,${height - margin.top - margin.bottom})`)
+     .attr("transform", `translate(0,${height - margin.bottom})`)
      .call(xAxis);
 // Add the Y Axis
 svg1.append("g")
@@ -180,7 +139,7 @@ svg1.append("text")
      .attr("class", "x label")
      .attr("text-anchor", "end")
      .attr("x", 180)
-     .attr("y", 350)
+     .attr("y", 410)
      .style("font-size", "15px")
      .text("Year");
 
@@ -189,7 +148,7 @@ svg1.append("text")
      .attr("class", "y label")
      .attr("text-anchor", "end")
      .attr("y", -50)
-     .attr("x", -50)
+     .attr("x", -100)
      .attr("dy", ".75em")
      .style("font-size", "15px")
      .attr("transform", "rotate(-90)")
@@ -246,8 +205,6 @@ iris.then(function(data) {
       d3.max(data,function (d) { return d.PetalWidthCm })
       ])
     .range([0,width])
-  console.log("AQUI")
-  console.log(d3.min(data,function (d) { return d.SepalLengthCm }))
   var yScale = d3.scaleLinear()
     .domain([
       d3.min(data,function (d) { return d.SepalLengthCm })-0.1,

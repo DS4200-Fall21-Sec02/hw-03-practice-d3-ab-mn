@@ -17,6 +17,67 @@ let svg1 = d3.select('#vis1')
   .attr('width', '100%') // this is now required by Chrome to ensure the SVG shows up at all
   .style('background-color', '#ccc') // change the background color to light gray
   .attr('viewBox', [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom].join(' '))
+
+let census = d3.csv("data/population_spain.csv")
+census.then(function(data){
+  let colorScale = {
+    "Female" : "Orange",
+    "Male" : "Blue"
+  }
+  var subgroups = data.columns.slice(1)
+  var groups = new Map(data, function(d){return(d.Year)}).keys()
+  console.log(groups);
+
+  // SVG
+  var svg = svg1.append('svg')
+      .attr('height',height + margin.top + margin.bottom)
+      .attr('width',width + margin.left + margin.right)
+    .append('g')
+      .attr('transform','translate(' + margin.left + ',' + margin.top + ')')
+
+  // Add X axis
+  var x = d3.scaleBand()
+      .domain(groups)
+      .range([0, width])
+      .padding([0.2])
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickSize(0));
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([1, 80])
+    .range([ height, 0 ]);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+  // Another scale for subgroup position?
+  var xSubgroup = d3.scaleBand()
+    .domain(subgroups)
+    .range([0, x.bandwidth()])
+    .padding([0.05])
+
+  // Show the bars
+  svg.append("g")
+    .selectAll("g")
+    // Enter in data = loop group per group
+    .data(data)
+    .enter()
+    .append("g")
+      .attr("transform", function(d) { return "translate(" + x(d.Year) + ",0)"; })
+    .selectAll("rect")
+    .data(function(d) { return subgroups.map(function(key) { return {key: key, value: d[key]}; }); })
+    .enter().append("rect")
+      .attr("x", function(d) { return xSubgroup(d.key); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("width", xSubgroup.bandwidth())
+      .attr("height", function(d) { return height - y(d.value); })
+      .attr("fill", function(d) { return color(d.key); });
+  
+})
+
+
+
 /*
 var bar = graph.selectAll("g") 
    .data(data)

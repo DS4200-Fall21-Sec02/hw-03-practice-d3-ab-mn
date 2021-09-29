@@ -9,6 +9,8 @@ let margin = {
   },
   width = 500 - margin.left - margin.right,
   height = 500 - margin.top - margin.bottom;
+  barPadding = .2;
+  axisTicks = {qty: 5, outerSize: 0, dateFormat: '%m-%d'};
 
 // first visualization
 let svg1 = d3.select('#vis1')
@@ -17,64 +19,203 @@ let svg1 = d3.select('#vis1')
   .attr('width', '100%') // this is now required by Chrome to ensure the SVG shows up at all
   .style('background-color', '#ccc') // change the background color to light gray
   .attr('viewBox', [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom].join(' '))
+  .attr("height", height)
+  .append("g")
+  .attr("transform", `translate(${margin.left},${margin.top})`)
 
-let census = d3.csv("data/population_spain.csv")
-census.then(function(data){
-  let colorScale = {
-    "Female" : "Orange",
-    "Male" : "Blue"
-  }
-  var subgroups = data.columns.slice(1)
-  var groups = new Map(data, function(d){return(d.Year)}).keys()
-  console.log(groups);
+  let data = d3.json("/data/population_spain.json")
+  data.then(function(data) {
 
-  // SVG
-  var svg = svg1.append('svg')
-      .attr('height',height + margin.top + margin.bottom)
-      .attr('width',width + margin.left + margin.right)
-    .append('g')
-      .attr('transform','translate(' + margin.left + ',' + margin.top + ')')
+    // Legend definition
+    svg1.append("circle").attr("cx",340).attr("cy",-20).attr("r", 6).style("fill", "#003f5c")
+    svg1.append("circle").attr("cx",340).attr("cy",10).attr("r", 6).style("fill", "#7a5195")
+    svg1.append("circle").attr("cx",340).attr("cy",40).attr("r", 6).style("fill", "#ef5675")
+    svg1.append("circle").attr("cx",340).attr("cy",70).attr("r", 6).style("fill", "#db8f00")
+    svg1.append("text").attr("x", 360).attr("y", -20).text("Range 1: 16 to 19 years old").style("font-size", "15px").attr("alignment-baseline","middle").style("fill", "#003f5c")
+    svg1.append("text").attr("x", 360).attr("y", 10).text("Range 2: 20 to 24 years old").style("font-size", "15px").attr("alignment-baseline","middle").style("fill", "#7a5195")
+    svg1.append("text").attr("x", 360).attr("y", 40).text("Range 3: 25 to 54 years old").style("font-size", "15px").attr("alignment-baseline","middle").style("fill", "#ef5675")
+    svg1.append("text").attr("x", 360).attr("y", 70).text("Range 4: 55 and above years old").style("font-size", "15px").attr("alignment-baseline","middle").style("fill", "#db8f00")
+    
 
-  // Add X axis
-  var x = d3.scaleBand()
-      .domain(groups)
-      .range([0, width])
-      .padding([0.2])
-  svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickSize(0));
+  var data = [
+    {
+      "Year": 2020,
+      "Range1": 5.54,
+      "Range2": 32.96,
+      "Range3": 73.1,
+      "Range4": 24.22
+    },
+    {
+      "Year": 2019,
+      "Range1": 8.02,
+      "Range2": 38.59,
+      "Range3": 75.75,
+      "Range4": 23.5
+    },
+    {
+      "Year": 2018,
+      "Range1": 7.36,
+      "Range2": 37.91,
+      "Range3": 74.67,
+      "Range4": 22.52
+    },
+    {
+      "Year": 2017,
+      "Range1": 6.63,
+      "Range2": 35.88,
+      "Range3": 73.17,
+      "Range4": 21.61
+    },
+    {
+      "Year": 2016,
+      "Range1": 5.49,
+      "Range2": 32.18,
+      "Range3": 71.49,
+      "Range4": 20.84
+    },
+    {
+      "Year": 2015,
+      "Range1": 4.87,
+      "Range2": 31.43,
+      "Range3": 69.39,
+      "Range4": 19.8
+    },
+    {
+      "Year": 2014,
+      "Range1": 4.64,
+      "Range2": 28.72,
+      "Range3": 67.41,
+      "Range4": 18.59
+    },
+  ];
 
-  // Add Y axis
-  var y = d3.scaleLinear()
-    .domain([1, 80])
-    .range([ height, 0 ]);
-  svg.append("g")
-    .call(d3.axisLeft(y));
+// Axis limitations
+var xScale0 = d3.scaleBand().range([0, width - margin.left - margin.right]).padding(barPadding)
+var xScale1 = d3.scaleBand()
+var yScale = d3.scaleLinear().range([height - margin.top - margin.bottom, 0])
 
-  // Another scale for subgroup position?
-  var xSubgroup = d3.scaleBand()
-    .domain(subgroups)
-    .range([0, x.bandwidth()])
-    .padding([0.05])
+// Axis ticks
+var xAxis = d3.axisBottom(xScale0).tickSizeOuter(axisTicks.outerSize);
+var yAxis = d3.axisLeft(yScale).ticks(axisTicks.qty).tickSizeOuter(axisTicks.outerSize);
 
-  // Show the bars
-  svg.append("g")
-    .selectAll("g")
-    // Enter in data = loop group per group
-    .data(data)
-    .enter()
-    .append("g")
-      .attr("transform", function(d) { return "translate(" + x(d.Year) + ",0)"; })
-    .selectAll("rect")
-    .data(function(d) { return subgroups.map(function(key) { return {key: key, value: d[key]}; }); })
-    .enter().append("rect")
-      .attr("x", function(d) { return xSubgroup(d.key); })
-      .attr("y", function(d) { return y(d.value); })
-      .attr("width", xSubgroup.bandwidth())
-      .attr("height", function(d) { return height - y(d.value); })
-      .attr("fill", function(d) { return color(d.key); });
-  
-})
+// Axis tags and domains
+xScale0.domain(data.map(d => d.Year))
+xScale1.domain(['Range1', 'Range2','Range3','Range4']).range([0, xScale0.bandwidth()])
+yScale.domain([0, 80])
+
+var Year = svg1.selectAll(".Year")
+  .data(data)
+  .enter().append("g")
+  .attr("class", "Year")
+  .attr("transform", d => `translate(${xScale0(d.Year)},0)`);
+
+// Add field1 bars 
+Year.selectAll(".bar.Range1")
+.data(d => [d])
+.enter()
+.append("rect")
+.attr("class", "bar Range1")
+.style("fill","#003f5c")
+.attr("x", d => xScale1('Range1'))
+.attr("y", d => yScale(d.Range1))
+.attr("width", xScale1.bandwidth())
+.attr("height", d => {
+  return height - margin.top - margin.bottom - yScale(d.Range1)
+});
+
+// Add field2 bars 
+Year.selectAll(".bar.Range2")
+.data(d => [d])
+.enter()
+.append("rect")
+.attr("class", "bar Range2")
+.style("fill","#7a5195")
+.attr("x", d => xScale1('Range2'))
+.attr("y", d => yScale(d.Range2))
+.attr("width", xScale1.bandwidth())
+.attr("height", d => {
+  return height - margin.top - margin.bottom - yScale(d.Range2)
+});
+
+/* Add field3 bars */
+Year.selectAll(".bar.Range3")
+.data(d => [d])
+.enter()
+.append("rect")
+.attr("class", "bar Range3")
+.style("fill","#ef5675")
+.attr("x", d => xScale1('Range3'))
+.attr("y", d => yScale(d.Range3))
+.attr("width", xScale1.bandwidth())
+.attr("height", d => {
+  return height - margin.top - margin.bottom - yScale(d.Range3)
+});
+
+/* Add field4 bars */
+Year.selectAll(".bar.Range4")
+.data(d => [d])
+.enter()
+.append("rect")
+.attr("class", "bar Range4")
+.style("fill","#db8f00")
+.attr("x", d => xScale1('Range4'))
+.attr("y", d => yScale(d.Range4))
+.attr("width", xScale1.bandwidth())
+.attr("height", d => {
+  return height - margin.top - margin.bottom - yScale(d.Range4)
+});
+
+// Add the X Axis
+svg1.append("g")
+     .attr("class", "x axis")
+     .attr("transform", `translate(0,${height - margin.top - margin.bottom})`)
+     .call(xAxis);
+// Add the Y Axis
+svg1.append("g")
+     .attr("class", "y axis")
+     .call(yAxis);
+
+// Axis labels
+svg1.append("text")
+     .attr("class", "x label")
+     .attr("text-anchor", "end")
+     .attr("x", 180)
+     .attr("y", 350)
+     .style("font-size", "15px")
+     .text("Year");
+
+
+svg1.append("text")
+     .attr("class", "y label")
+     .attr("text-anchor", "end")
+     .attr("y", -50)
+     .attr("x", -50)
+     .attr("dy", ".75em")
+     .style("font-size", "15px")
+     .attr("transform", "rotate(-90)")
+     .text("Population percentage");
+
+// Title of the plot
+svg1.append("text")
+   .attr("x", 170)
+   .attr("y", -20)
+   .attr("text-anchor", "middle")
+   .style("font-size", "22px")
+   .style("font-weight", "bold")
+   .text("Spanish Employment Rates");
+
+
+  })
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -23,33 +23,40 @@ let svg1 = d3.select('#vis1')
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`)
 
+  // Load data from csv 
   let data = d3.csv("/data/population_spain.csv")
   data.then(function(data) {
 
     // Legend definition
+    // For each range of age (bar) we create a dot and text element 
+    // For each circle we add an x and y position, a radius value and the color for each of them
     svg1.append("circle").attr("cx",360).attr("cy",-20).attr("r", 6).style("fill", "#003f5c")
     svg1.append("circle").attr("cx",360).attr("cy",10).attr("r", 6).style("fill", "#7a5195")
     svg1.append("circle").attr("cx",360).attr("cy",40).attr("r", 6).style("fill", "#ef5675")
     svg1.append("circle").attr("cx",360).attr("cy",70).attr("r", 6).style("fill", "#db8f00")
+    // For each text we add an x and y position, a text value, the size of the text, its alignment and color for each of them
     svg1.append("text").attr("x", 380).attr("y", -20).text("Range 1: 16 to 19 years old").style("font-size", "12px").attr("alignment-baseline","middle").style("fill", "#003f5c")
     svg1.append("text").attr("x", 380).attr("y", 10).text("Range 2: 20 to 24 years old").style("font-size", "12px").attr("alignment-baseline","middle").style("fill", "#7a5195")
     svg1.append("text").attr("x", 380).attr("y", 40).text("Range 3: 25 to 54 years old").style("font-size", "12px").attr("alignment-baseline","middle").style("fill", "#ef5675")
     svg1.append("text").attr("x", 380).attr("y", 70).text("Range 4: 55 and above years old").style("font-size", "12px").attr("alignment-baseline","middle").style("fill", "#db8f00")
 
-// Axis limitations
+// Axis limitations for placement inside the viewBox 
+// For the x axis we take into account the width and margin for an accurate placement
 var xScale0 = d3.scaleBand().range([0, width - margin.left - margin.right]).padding(barPadding)
 var xScale1 = d3.scaleBand()
+// For the y axis we take into account the height and bottom margin
 var yScale = d3.scaleLinear().range([height - margin.bottom, 0])
 
-// Axis ticks
+// Axis ticks alignment for x and y axis
 var xAxis = d3.axisBottom(xScale0).tickSizeOuter(axisTicks.outerSize);
 var yAxis = d3.axisLeft(yScale).ticks(axisTicks.qty).tickSizeOuter(axisTicks.outerSize);
 
-// Axis tags and domains
+// Axis tags and domains, we set the year values for the x axis and inside the bars representing the age ranges, and a simple range for y representing the percentage
 xScale0.domain(data.map(d => d.Year))
 xScale1.domain(['Range1', 'Range2','Range3','Range4']).range([0, xScale0.bandwidth()])
 yScale.domain([0, 80])
 
+// With the next piece of code we add the year values into the graph
 var Year = svg1.selectAll(".Year")
   .data(data)
   .enter().append("g")
@@ -57,6 +64,8 @@ var Year = svg1.selectAll(".Year")
   .attr("transform", d => `translate(${xScale0(d.Year)},0)`);
 
 // Add field1 bars 
+// For each value of the first column we include a class, color, x and y position, width and height attributes
+// Also, for an interactive experience we have included a function to show the information when the user places the mouse over a bar element
 Year.selectAll(".bar.Range1")
 .data(d => [d])
 .enter()
@@ -74,6 +83,7 @@ Year.selectAll(".bar.Range1")
                             '\n Year: ' + d.Year});
 
 // Add field2 bars 
+// Same attributes as for field1
 Year.selectAll(".bar.Range2")
 .data(d => [d])
 .enter()
@@ -90,7 +100,8 @@ Year.selectAll(".bar.Range2")
                            '\nPercentage Employed: ' + d.Range2 + '%' + 
                             '\n Year: ' + d.Year});
 
-/* Add field3 bars */
+// Add field3 bars 
+// Same attributes as for field1
 Year.selectAll(".bar.Range3")
 .data(d => [d])
 .enter()
@@ -107,7 +118,8 @@ Year.selectAll(".bar.Range3")
                            '\nPercentage Employed: ' + d.Range3 + '%' + 
                             '\n Year: ' + d.Year});
 
-/* Add field4 bars */
+// Add field4 bars 
+// Same attributes as for field1
 Year.selectAll(".bar.Range4")
 .data(d => [d])
 .enter()
@@ -124,19 +136,18 @@ Year.selectAll(".bar.Range4")
                            '\nPercentage Employed: ' + d.Range4 + '%' + 
                             '\n Year: ' + d.Year});
 
-// Add the X Axis
+// Add the x axis and set the correct placement
 svg1.append("g")
      .attr("class", "x axis")
      .attr("transform", `translate(0,${height - margin.bottom})`)
      .call(xAxis);
-// Add the Y Axis
+// Add the y axis 
 svg1.append("g")
      .attr("class", "y axis")
      .call(yAxis);
 
-// Axis labels
+// We have created this two next pieces of code for the axis labels using class, text-anchor, font size and text attributes
 svg1.append("text")
-     .attr("class", "x label")
      .attr("text-anchor", "end")
      .attr("x", 180)
      .attr("y", 410)
@@ -146,7 +157,6 @@ svg1.append("text")
 
 
 svg1.append("text")
-     .attr("class", "y label")
      .attr("text-anchor", "end")
      .attr("y", -50)
      .attr("x", -100)
@@ -156,7 +166,7 @@ svg1.append("text")
      .attr("transform", "rotate(-90)")
      .text("Population percentage");
 
-// Title of the plot
+// Title of the plot using the same approach as above
 svg1.append("text")
    .attr("x", 170)
    .attr("y", -20)

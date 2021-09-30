@@ -140,6 +140,7 @@ svg1.append("text")
      .attr("text-anchor", "end")
      .attr("x", 180)
      .attr("y", 410)
+     .attr('class', 'axisLabel')
      .style("font-size", "15px")
      .text("Year");
 
@@ -150,6 +151,7 @@ svg1.append("text")
      .attr("y", -50)
      .attr("x", -100)
      .attr("dy", ".75em")
+     .attr('class', 'axisLabel')
      .style("font-size", "15px")
      .attr("transform", "rotate(-90)")
      .text("Population percentage");
@@ -162,19 +164,7 @@ svg1.append("text")
    .style("font-size", "22px")
    .style("font-weight", "bold")
    .text("Spanish Employment Rates");
-
-
   })
-
-
-
-
-
-
-
-
-
-
 
 // second visualization
 let svg2 = d3.select('#vis2')
@@ -204,22 +194,23 @@ iris.then(function(data) {
       d3.min(data,function (d) { return d.PetalWidthCm })-0.1,
       d3.max(data,function (d) { return d.PetalWidthCm })
       ])
-    .range([0,width])
+    .range([margin.left,width - margin.right])
   var yScale = d3.scaleLinear()
     .domain([
       d3.min(data,function (d) { return d.SepalLengthCm })-0.1,
       d3.max(data,function (d) { return d.SepalLengthCm })
       ])
-    .range([height,0])
+    .range([height - margin.bottom,0])
   // SVG
   var g = svg2.append('g')
       .attr('transform','translate(' + margin.left + ',' + margin.top + ')')
-  g.append('text')
-        .attr('x', width/2)
-        .attr('y', -20)
-        .attr('text-anchor', 'middle')
-        .style('font-size', 32)
-        .text('Size of Iris Species');
+  g.append("text")
+   .attr("x", width/2)
+   .attr("y", -20)
+   .attr("text-anchor", "middle")
+   .style("font-size", "22px")
+   .style("font-weight", "bold")
+   .text("Size of Iris Species");
   // X-axis
   var xAxis = d3.axisBottom(xScale);
   // Y-axis
@@ -256,24 +247,25 @@ iris.then(function(data) {
   // X-axis
   g.append('g')
       .attr('class','axis')
-      .attr('transform', 'translate(0,' + height + ')')
+      .attr('transform', 'translate(0,' + (height - margin.bottom) + ')')
       .call(xAxis)
   g.append('text') // X-axis Label
       .attr('class','axisLabel')
-      .attr('y',height-20)
-      .attr('x',width)
+      .attr('y',height)
+      .attr('x',width/2+margin.left)
       .attr('dy','.6em')
       .style('text-anchor','end')
       .text('Petal Width')
   // Y-axis
   g.append('g')
       .attr('class', 'axis')
+      .attr('transform', 'translate(' + (margin.left) + ', 0)')
       .call(yAxis)
   g.append('text') // y-axis Label
       .attr('class','axisLabel')
       .attr('transform','rotate(-90)')
-      .attr('x',0)
-      .attr('y',5)
+      .attr('x',-width/2+margin.top)
+      .attr('y',0)
       .attr('dy','1em')
       .style('text-anchor','end')
       .text('Sepal Length')

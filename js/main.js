@@ -184,21 +184,23 @@ let svg2 = d3.select('#vis2')
   .style('background-color', '#ccc') // change the background color to light gray
   .attr('viewBox', [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom].join(' '))
 
-
+// read Data
 let iris = d3.csv("data/iris.csv")
+// present viz
 iris.then(function(data) {
-  // Scales
+  // Discrete Color Scale
   let colorScale = {
     "Iris-setosa": "red",
     "Iris-versicolor": "green",
     "Iris-virginica": "blue"
   }
-
+  // Dictionary with category name formatted
   let speciesFormatted = {
     "Iris-setosa": "Iris setosa",
     "Iris-versicolor": "Iris versicolor",
     "Iris-virginica": "Iris virginica"
   }
+  // scales relative to the data they contain 
   var xScale = d3.scaleLinear()
     .domain([
       d3.min(data,function (d) { return d.PetalWidthCm })-0.1,
@@ -211,9 +213,10 @@ iris.then(function(data) {
       d3.max(data,function (d) { return d.SepalLengthCm })
       ])
     .range([height - margin.bottom,0])
-  // SVG
+  // create svg group holding the viz
   var g = svg2.append('g')
       .attr('transform','translate(' + margin.left + ',' + margin.top + ')')
+  // viz title
   g.append("text")
    .attr("x", width/2)
    .attr("y", -20)
@@ -221,57 +224,70 @@ iris.then(function(data) {
    .style("font-size", "22px")
    .style("font-weight", "bold")
    .text("Size of Iris Species");
-  // X-axis
+  // x-axis
   var xAxis = d3.axisBottom(xScale);
-  // Y-axis
+  // y-axis
   var yAxis = d3.axisLeft(yScale);
-  // Circles
-  var circles = g.selectAll('circle')
+  // points
+  var points = g.selectAll('circle')
       .data(data)
       .enter()
     .append('circle')
+      // center coordinates
       .attr('cx',function (d) { return xScale(d.PetalWidthCm) })
       .attr('cy',function (d) { return yScale(d.SepalLengthCm) })
+      // radius
       .attr('r',7.5)
+      // given point class assignment
       .attr('class','point')
+      // overwrite .point fill with specified colors in dictionary
       .style('fill',function (d,i) { return colorScale[d.Species] })
+      // point selected
       .on('mouseover', function () {
         d3.select(this)
           .transition()
           .duration(500)
+          // apply .selected point class
           .attr('class','selected')
           .attr('stroke-width',2)
       })
+      // point unselected
       .on('mouseout', function () {
         d3.select(this)
           .transition()
           .duration(500)
+          // restore previous class
           .attr('class', 'point')
           .attr('stroke-width',1)
       })
-    .append('title') // Tooltip
+    // Tooltip
+    .append('title')
     .text(function (d) { return 'Species: ' + speciesFormatted[d.Species] +
                            '\nPetal Width: ' + d.PetalWidthCm +
                            '\nSepal Length: ' + d.SepalLengthCm });
                            
-  // X-axis
+  // x-axis
   g.append('g')
       .attr('class','axis')
       .attr('transform', 'translate(0,' + (height - margin.bottom) + ')')
       .call(xAxis)
-  g.append('text') // X-axis Label
+  // x-axis Label
+  g.append('text')
+      //given class
       .attr('class','axisLabel')
       .attr('y',height)
       .attr('x',width/2+margin.left)
       .attr('dy','.6em')
       .style('text-anchor','end')
       .text('Petal Width')
-  // Y-axis
+  // y-axis
   g.append('g')
       .attr('class', 'axis')
       .attr('transform', 'translate(' + (margin.left) + ', 0)')
       .call(yAxis)
-  g.append('text') // y-axis Label
+  // y-axis Label
+  g.append('text')
+      // given class
       .attr('class','axisLabel')
       .attr('transform','rotate(-90)')
       .attr('x',-width/2+margin.top)

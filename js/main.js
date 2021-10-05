@@ -185,7 +185,7 @@ let svg2 = d3.select('#vis2')
   .attr('viewBox', [0, 0, width + margin.left + margin.right, height + margin.top + margin.bottom].join(' '))
 
 // read Data
-let iris = d3.csv("main/data/iris.csv")
+let iris = d3.csv("https://raw.githubusercontent.com/DS4200-Fall21-Sec02/hw-03-practice-d3-ab-mn/main/data/Iris.csv")
 // present viz
 iris.then(function(data) {
   // Discrete Color Scale
